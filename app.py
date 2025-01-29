@@ -4,7 +4,6 @@ from dataclasses import dataclass
 import streamlit as st
 from ai_service import LocalLLM
 from email_service import EmailFetcher
-from config import TEST_USERNAME, TEST_PASSWORD
 
 
 @dataclass(frozen=True)
