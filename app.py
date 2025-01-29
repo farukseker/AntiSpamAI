@@ -72,37 +72,38 @@ def main() -> None:
     # Streamlit UI
     st.set_page_config(layout="wide")
     st.title("Email Spam Classifier")
-
-    st.subheader("SMTP Login")
-    email_user = st.text_input("Email Address")
-    email_pass = st.text_input("Email Password", type="password")
-
     classifier = EmailSpamClassifier()
-    llm_list = classifier.local_llm.list_llm()
 
-    selected_model = st.selectbox("Choose a model", llm_list)
-    classifier.local_llm.selected_model = selected_model
+    if llm_list := classifier.local_llm.list_llm():
+        st.subheader("SMTP Login")
+        email_user = st.text_input("Email Address", type='password', value='f4rukseker@gmail.com')
+        email_pass = st.text_input("Email Password", type="password", value='xrvfqrfvseegcnno')
 
-    row = st.number_input(label='Set a mail limit or 0 unlimited', value=10)
+        selected_model = st.selectbox("Choose a model", llm_list)
+        classifier.local_llm.selected_model = selected_model
 
-    if st.button("Fetch and Analyze Emails"):
-        classifier.email_fetcher = EmailFetcher(email_user, email_pass)
-        results = classifier.fetch_and_analyze_emails(row)
+        row = st.number_input(label='Set a mail limit or 0 unlimited', value=10)
 
-        st.subheader("Analysis Results")
-        st.table([result.__dict__ for result in results])
+        if st.button("Fetch and Analyze Emails"):
+            classifier.email_fetcher = EmailFetcher(email_user, email_pass)
+            results = classifier.fetch_and_analyze_emails(row)
 
-        if results:
-            df = pd.DataFrame([result.__dict__ for result in results])
-            import io
+            st.subheader("Analysis Results")
+            st.table([result.__dict__ for result in results])
 
-            excel_buffer = io.BytesIO()
-            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-                df.to_excel(writer, index=False)
-            excel_buffer.seek(0)
+            if results:
+                df = pd.DataFrame([result.__dict__ for result in results])
+                import io
 
-            st.download_button(label="Download Results as Excel", data=excel_buffer, file_name="email_analysis.xlsx",
-                               mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                excel_buffer = io.BytesIO()
+                with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                    df.to_excel(writer, index=False)
+                excel_buffer.seek(0)
+
+                st.download_button(label="Download Results as Excel", data=excel_buffer, file_name="email_analysis.xlsx",
+                                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    else:
+        st.error('please start "ollama"')
 
 
 if __name__ == '__main__':
